@@ -10,7 +10,7 @@
 ############################
 
 # Name of website
-title: "Homepage"
+title: Homepage
 
 # Your name to show in the footer
 author: Cheng Shen
@@ -20,11 +20,8 @@ author: Cheng Shen
 ###############################################
 
 navbar-links:
-  About Me: "aboutme"
-  Resources:
-    - Beautiful Jekyll: "https://beautifuljekyll.com"
-    - Learn markdown: "https://www.markdowntutorial.com/"
-  Author's home: "https://deanattali.com"
+  Tech Blog: "techblog"
+  Suibi: "suibi"
 
 ################
 # --- Logo --- #
@@ -53,9 +50,9 @@ social-network-links:
   email: "shenchg126@gmail.com"
   github: SCAuFish
   twitter: scaufish
+  linkedin: cheng-shen
 #  medium: yourname
 #  reddit: yourname or r/yoursubreddit
-#  linkedin: daattali
 #  xing: yourname
 #  stackoverflow: "3943160/daattali"
 #  snapchat: deanat78
@@ -95,7 +92,7 @@ share-links-active:
 
 # How to display the link to your website in the footer
 # Remove this if you don't want a link in the footer
-url-pretty: "MyWebsite.com"
+url-pretty: "scaufish.github.io"
 
 # Add the website title to the title of every page
 title-on-all-pages: true
