@@ -1,0 +1,10 @@
+.navbar-brand {
+    font-family: 'Roboto Slab', serif;
+    font-weight: 700;
+    font-size: 1.75rem;
+    color: #404040;
+}
+
+.navbar-custom .navbar-brand {
+    font-family: 'Roboto Slab', serif;
+}
