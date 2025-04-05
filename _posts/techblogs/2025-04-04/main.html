@@ -1,0 +1,489 @@
+---
+layout: post
+title: Reinforcement Learning Algorithms in Deep Generative Model
+tags: [techblog]
+comments: true
+mathjax: true
+author: Cheng Shen
+<!-- cover-img: https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg -->
+thumbnail-img: https://img.youtube.com/vi/8YI4-Xe6LVg/default.jpg
+---
+
+<p style="text-align: center;">
+  Sharing session at Stanford XCS 236 on April 4th 2025 covering RL algorithms in LLM training (with DeepSeek-R1 as an example)
+  </p>
+  <div style="text-align: center;">
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/8YI4-Xe6LVg" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  </div>
+  <!--more-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reinforcement Learning Algorithms in Deep Generative Model</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 20px auto;
+        }
+        .center {
+            text-align: center;
+        }
+        blockquote {
+            border-left: 4px solid #2c3e50;
+            margin: 20px 0;
+            padding-left: 20px;
+            color: #666;
+        }
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .math {
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Reinforcement Learning Algorithms in Deep Generative Model</h1>
+    <p><strong>Name</strong>: Cheng Shen<br>
+    <strong>Email</strong>: shenchg126@gmail.com<br>
+    <strong>Website</strong>: <a href="https://scaufish.github.io/">https://scaufish.github.io/</a></p>
+
+    <p><strong>RLHF has become a routine in LLM training these days</strong></p>
+    
+    <blockquote>
+        <p>"To make our models safer, more helpful, and more aligned, we use an existing technique called reinforcement learning from human feedback (RLHF)⁠."</p>
+        <p>Source: <a href="https://openai.com/index/instruction-following/?utm_source=chatgpt.com">OpenAI: Aligning language models to follow instructions, 01-2022</a></p>
+    </blockquote>
+
+    <blockquote>
+        <p>"We apply preference modeling and reinforcement learning from human feedback (RLHF) to finetune language models to act as helpful and harmless assistants. We find this alignment training improves performance on almost all NLP evaluations, and is fully compatible with training for specialized skills such as python coding and summarization."</p>
+        <p>Source: <a href="https://www.anthropic.com/research/training-a-helpful-and-harmless-assistant-with-reinforcement-learning-from-human-feedback">Anthropic: Training a Helpful and Harmless Assistant with Reinforcement Learning from Human Feedback, 04-2022</a></p>
+    </blockquote>
+
+    <blockquote>
+        <p>"We introduce our first-generation reasoning models, DeepSeek-R1-Zero and DeepSeek-R1. DeepSeek-R1-Zero, a model trained via large-scale reinforcement learning (RL) without supervised fine-tuning (SFT) as a preliminary step, demonstrated remarkable performance on reasoning."</p>
+        <p>Source: <a href="https://arxiv.org/abs/2501.12948">DeepSeek: DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning, 01-2025</a></p>
+    </blockquote>
+
+    <p><a href="https://x.com/karpathy/status/1821277264996352246">and there've been interesting discussions</a></p>
+    <div class="center">
+        <img src="a_karpathy_note.png" alt="A note from Andrej Karpathy on Reinforcement Learning" width="600">
+    </div>
+
+    <h2>Agenda</h2>
+    <ol>
+        <li><a href="#1-introduction-to-rl">Introduction to RL</a></li>
+        <li><a href="#2-introduction-to-llm">Introduction to LLM</a></li>
+        <li><a href="#3-deepseek-training-paradigm">DeepSeek Training Paradigm</a></li>
+        <li><a href="#4-qa">Q&A</a></li>
+    </ol>
+
+    <h2 id="1-introduction-to-rl">1. Introduction to RL</h2>
+    <div class="center">
+        <img src="rl_visualization.png" alt="Reinforcement Learning Visualization" width="600">
+    </div>
+
+    <p>Take the classic, yet still impressive AlphaGo as an example <a href="https://deepmind.google/research/breakthroughs/alphago/">DeepMind: AlphaGo</a></p>
+
+    <h3>Basic Concepts</h3>
+    <ul>
+        <li><strong>State</strong> (\(s \in \mathcal{S}\)): The environment's current situation
+            <ul>
+                <li>In a game of Go: \(s \in \{null, white, black\}^{361}\) is current state on the board.</li>
+            </ul>
+        </li>
+        <li><strong>Action</strong> (\(a \in \mathcal{A}\)): The agent's possible moves
+            <ul>
+                <li>Assuming the agent plays black, \(a \in \{0, ..., 360\}\)</li>
+            </ul>
+        </li>
+        <li><strong>Reward</strong> (\(r \in \mathbb{R}\)): Immediate feedback signal
+            <ul>
+                <li>Reward in Go could be quite sparse: -1/+1 depending on final loss/win</li>
+                <li>Other designs: reward for capturing opponent's stones?</li>
+                <li>AlphaGo: sparse reward depending only the final result</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h3>Key Functions</h3>
+    <ul>
+        <li><strong>Policy function</strong> (\(\pi(a|s)\)): Probability distribution over actions given state</li>
+        <li><strong>Value function</strong> (\(V^\pi(s) = \mathbb{E}_\pi[\sum_{t=0}^{\infty} \gamma^t r_t | s_0 = s]\)): Expected cumulative reward starting from state \(s\)
+            <ul>
+                <li>The expected likelihood to win/lose given the current state and policy</li>
+            </ul>
+        </li>
+        <li><strong>Q-function</strong> (\(Q^\pi(s,a) = \mathbb{E}_\pi[\sum_{t=0}^{\infty} \gamma^t r_t | s_0 = s, a_0 = a]\)): Expected return after taking action \(a\) in state \(s\)
+            <ul>
+                <li>Note how <strong>value function</strong> and <strong>Q-function</strong> are related:</li>
+                <li>\(V^\pi(s) = \sum_{a \in \mathcal{A}} \pi(a|s) Q^\pi(s,a)\) or</li>
+                <li>\(V^\pi(s) = \mathbb{E}_{a \sim \pi(\cdot|s)}[Q^\pi(s,a)]\)</li>
+            </ul>
+        </li>
+        <li><strong>Reward function</strong> (\(r(s,a,s')\)): Immediate reward for transition from \(s\) to \(s'\) via action \(a\)</li>
+    </ul>
+
+    <h3>Objective</h3>
+    <ul>
+        <li>Maximize expected cumulative reward: \(J(\pi) = \mathbb{E}_\pi[\sum_{t=0}^{\infty} \gamma^t r_t]\)</li>
+        <li>Find optimal policy: \(\pi^* = \arg\max_\pi J(\pi)\)</li>
+    </ul>
+
+    <h3>Approaches</h3>
+    <ul>
+        <li><strong>Value-based</strong>: Learn \(V(s)\) or \(Q(s,a)\) (e.g., Q-learning, DQN)</li>
+        <li><strong>Policy-based</strong>: Directly optimize \(\pi(a|s)\) (e.g., REINFORCE, PPO)</li>
+        <li><strong>Actor-Critic</strong>: Combine both approaches (e.g. PPO on advantage)</li>
+    </ul>
+
+    <h3>Policy Gradients and PPO</h3>
+    <p>Policy gradient methods learn a parameterized policy that can select actions without consulting a value function.</p>
+
+    <p>The policy gradient theorem gives us the gradient of this objective (<a href="https://lilianweng.github.io/posts/2018-04-08-policy-gradient/">Lilian's blog</a>):</p>
+
+    <div class="math">
+        \[\nabla J(\theta) = \mathbb{E}_{\tau \sim p_\theta(\tau)}[\sum_{t=0}^{T} \nabla_\theta \log \pi_\theta(a_t|s_t) \cdot A(s_t, a_t)]\]
+    </div>
+
+    <p>Where:</p>
+    <ul>
+        <li>\(\theta\) represents the policy parameters</li>
+        <li>\(\tau\) is a trajectory (sequence of states and actions)</li>
+        <li>\(p_\theta(\tau)\) is the probability of trajectory \(\tau\) under policy \(\pi_\theta\)</li>
+        <li>\(A(s_t, a_t)\) is the advantage function at state \(s_t\) and action \(a_t\)</li>
+        <li>\(\log \pi_\theta(a_t|s_t)\) is the log probability of taking action \(a_t\) in state \(s_t\) under policy \(\pi_\theta\)</li>
+    </ul>
+
+    <p>Where \(A(s_t, a_t)\) is the advantage function, which measures how much better taking action \(a_t\) in state \(s_t\) is compared to the average action according to the current policy:</p>
+
+    <div class="math">
+        \[A(s_t, a_t) = Q(s_t, a_t) - V(s_t)\]
+    </div>
+
+    <h4>Key algorithms and concepts:</h4>
+
+    <p><strong>REINFORCE (Monte Carlo Policy Gradient)</strong></p>
+    <ul>
+        <li>The most basic policy gradient algorithm</li>
+        <li>Updates policy parameters using the gradient: \(\theta \leftarrow \theta + \alpha \nabla_\theta \log \pi_\theta(a_t|s_t) \cdot G_t\)</li>
+        <li>Where \(G_t\) is the return from time step \(t\)</li>
+        <li>High variance in gradient estimates due to randomness in trajectories</li>
+    </ul>
+
+    <p><strong>Proximal Policy Optimization (PPO)</strong></p>
+    <ul>
+        <li>Addresses the problem of large policy updates destabilizing training</li>
+        <li>Uses a clipped surrogate objective with advantage function:</li>
+    </ul>
+
+    <div class="math">
+        \[L^{CLIP}(\theta) = \mathbb{E}_t[\min(r_t(\theta) A_t, \text{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon) A_t)]\]
+    </div>
+
+    <p>The full PPO loss function combines three components:</p>
+
+    <div class="math">
+        \[L^{PPO}(\theta) = L^{CLIP}(\theta) - c_1 L^{VF}(\theta) + c_2 S[\pi_\theta](s)\]
+    </div>
+
+    <p>where:</p>
+    <ul>
+        <li>\(L^{CLIP}(\theta)\) is the clipped surrogate objective described above</li>
+        <li>\(L^{VF}(\theta)\) is the value function loss, typically a squared-error loss:
+            <div class="math">\[L^{VF}(\theta) = (V_\theta(s_t) - V_t^{target})^2\]</div>
+        </li>
+        <li>\(S[\pi_\theta](s)\) is an entropy bonus to encourage exploration:
+            <div class="math">\[S[\pi_\theta](s) = -\sum_a \pi_\theta(a|s) \log \pi_\theta(a|s)\]</div>
+        </li>
+        <li>\(c_1\) and \(c_2\) are coefficients that balance the importance of each term</li>
+    </ul>
+
+    <p>This combined objective encourages both policy improvement and accurate value estimation while maintaining sufficient exploration.</p>
+
+    <p>where:</p>
+    <ul>
+        <li>\(r_t(\theta) = \frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_{old}}(a_t|s_t)}\) is the probability ratio</li>
+        <li>\(A_t\) is the advantage estimate at timestep \(t\)</li>
+        <li>The clipping prevents the ratio from moving too far from 1, limiting the policy update size</li>
+    </ul>
+
+    <h4>Comparisions</h4>
+
+    <p>Key advantages of policy gradient methods:</p>
+    <ul>
+        <li>Can learn stochastic policies, which may be optimal in partially observable environments</li>
+        <li>Can handle continuous action spaces naturally</li>
+        <li>Can learn policies with arbitrary action distributions</li>
+        <li>More stable learning in many environments compared to value-based methods</li>
+    </ul>
+
+    <p>Challenges:</p>
+    <ul>
+        <li>High variance in gradient estimates</li>
+        <li>Sample inefficiency</li>
+        <li>Sensitivity to hyperparameters</li>
+        <li>Potential for premature convergence to suboptimal policies</li>
+    </ul>
+
+    <h3>Try them out!</h3>
+    <ul>
+        <li><a href="https://gymnasium.farama.org">Gymnasium</a></li>
+        <li><a href="https://gymnasium.farama.org">Huggingface RL Algorighms</a></li>
+        <li>...</li>
+    </ul>
+
+    <pre><code># python3.9, gym=0.26.2, stable_baselines3=2.6.0
+import gym
+from stable_baselines3 import PPO
+from stable_baselines3.common.evaluation import evaluate_policy
+
+# Create the CartPole environment
+env = gym.make("CartPole-v1")
+
+# Instantiate the PPO model with an MLP policy
+model = PPO("MlpPolicy", env, verbose=1)
+
+# Train the model for 10,000 timesteps
+model.learn(total_timesteps=10000)
+
+# Evaluate the trained model
+mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=10)
+print(f"Mean reward: {mean_reward:.2f} +/- {std_reward:.2f}")
+
+# Save the trained model
+model.save("ppo_CartPole")
+
+# To demonstrate loading, delete the existing model and load it back
+del model
+model = PPO.load("ppo_CartPole", env=env)
+
+# Enjoy the trained agent
+obs, _ = env.reset()
+for _ in range(1000):
+    action, _ = model.predict(obs, deterministic=True)
+    obs, reward, done, truncated, info = env.step(action)
+    env.render()
+    if done or truncated:
+        obs, _ = env.reset()
+
+env.close()</code></pre>
+
+    <h2 id="2-introduction-to-llm">2. Introduction to LLM</h2>
+    <h3>2.1 Autoregressive generative model</h3>
+    <p>Autoregressive language models generate text by predicting one token at a time, with each prediction conditioned on all previously generated tokens. This sequential generation process can be formalized as:</p>
+
+    <div class="math">
+        \[p(x) = \prod_{t=1}^{T} p(x_t | x_{<t})\]
+    </div>
+
+    <p>Where:</p>
+    <ul>
+        <li>\(p(x)\) is the probability of generating the entire sequence \(x\)</li>
+        <li>\(x_t\) is the token at position \(t\)</li>
+        <li>\(x_{<t}\) represents all tokens before position \(t\)</li>
+        <li>\(T\) is the total sequence length</li>
+        <li>Note how this is analogous to policy function in RL: \(\pi(a|s)\)</li>
+    </ul>
+
+    <p>Key principles:</p>
+    <ul>
+        <li><strong>Conditional probability</strong>: Each token is predicted based on the context of all previous tokens</li>
+        <li><strong>Maximum likelihood training</strong>: Models are trained to maximize the log probability of predicting the correct next token</li>
+        <li><strong>Teacher forcing</strong>: During training, ground truth tokens are used as context regardless of the model's predictions</li>
+        <li><strong>Attention mechanisms</strong>: Modern autoregressive models like GPT use self-attention to capture dependencies between tokens at different positions</li>
+        <li><strong>Causal masking</strong>: To maintain the autoregressive property, attention is masked to prevent looking at future tokens</li>
+    </ul>
+
+    <p>The training objective is typically to minimize the negative log-likelihood:</p>
+
+    <div class="math">
+        \[\mathcal{L}(\theta) = -\sum_{t=1}^{T} \log p_\theta(x_t | x_{<t})\]
+    </div>
+
+    <p>Where \(\theta\) represents the model parameters.</p>
+
+    <h3>2.2 Transformer and Decoder-only model</h3>
+    <div class="center">
+        <img src="transformer.png" alt="Transformer Architecture" width="600">
+    </div>
+
+    <h4>Generative Pretrained Transformer <a href="https://jalammar.github.io/images/xlnet/gpt-2-autoregression-2.gif">visualization by Jay Alammar</a></h4>
+    <div class="center">
+        <img src="gpt-2-autoregression-2.gif" alt="Auregressive model (GPT-2)" width="600">
+    </div>
+
+    <h3>2.3 RLHF in LLM</h3>
+    <ul>
+        <li>Current LLM training usually contains following stages: pretraining, supervised fine-tuning (SFT), Reinforcement Learning with Human Feedback / Preference Optimization</li>
+        <li>Used for alignment, and improvements where directly labeled data is hard to obtain.</li>
+        <li>Human annotators are better at picking the better answer, than writing a good answer -- so is the reward model</li>
+    </ul>
+
+    <div class="center">
+        <img src="dpo_graph.png" alt="DPO v.s. PPO RLHF" width="600">
+    </div>
+
+    <p><strong>with PPO (Proximal Policy Optimization)</strong></p>
+    <ol>
+        <li>Collect outputs and human preferences on input \((x, y_1, y_2, b)\), where \(b\) is the human selection. Initialize reward model \(r\) as \(\pi_{SFT}\), and initialize reference model \(\pi_{ref}\) as \(\pi_{SFT}\).</li>
+        <li>Train reward model \(r\) based on human preference (Bradley-Terry Loss). \(r\) is usually initialized with a LLM after SFT \(\pi_{SFT}\).</li>
+        <li>Optimize policy \(\pi\) over modified reward \(R = r(x, y) + \beta \mathbf{D}_{KL}(\pi_\theta(y|x) | \pi_{ref}(y|x))\)</li>
+        <li>Collect more human feedback on samples generated by \(\pi_{ref}\), repeat step 2-3.</li>
+    </ol>
+
+    <p><strong>Simplification with DPO (Direct Preference Optimization)</strong></p>
+    <ul>
+        <li>Proposed specifically for LLM RLHF stage.</li>
+        <li>No need to train a separate reward model, as the reward model can be rewritten in the form with policy.</li>
+        <li>Leverages offline generated samples and human labels.</li>
+    </ul>
+
+    <div class="math">
+        \[\mathcal{L}_{\text{DPO}}(\pi_{\theta}; \pi_{\text{ref}}) 
+        = -\mathbb{E}_{(x,y_w,y_l) \sim \mathcal{D}} 
+        \left[ 
+            \log \sigma\left(
+                \beta \log \frac{\pi_{\theta}(y_w \mid x)}{\pi_{\text{ref}}(y_w \mid x)} 
+                - \beta \log \frac{\pi_{\theta}(y_l \mid x)}{\pi_{\text{ref}}(y_l \mid x)}
+            \right)
+        \right]\]
+    </div>
+
+    <h2 id="3-deepseek-training-paradigm">3. DeepSeek Training Paradigm</h2>
+    <h3>3.1 DeepSeek-R1 and DeepSeek-R1-Zero <a href="https://x.com/SirrahChan/status/1881488738473357753">visualization by Harry Chan</a></h3>
+    <div class="center">
+        <img src="deepseek-r1-vis.jpeg" alt="How DeepSeek-R1 is trained" width="800">
+    </div>
+
+    <ul>
+        <li>DeepSeek-V3 Base: Trained on 14.8T tokens
+            <ul>
+                <li>Good old next-token prediction</li>
+                <li>Fill-in-Middle (FIM) strategy on 10% of data</li>
+            </ul>
+        </li>
+        <li>DeepSeek-V3:
+            <ul>
+                <li>Supervised Fine-tuning (SFT): 1.5M instances of instruction</li>
+                <li>Reinforcement Leraning (GRPO)</li>
+            </ul>
+        </li>
+        <li>Reward model is more result-oriented
+            <ul>
+                <li>Leverage rule-based reward for coding and math questions</li>
+                <li>Reward model trained with human feedback on non-reasoning tasks</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h3>3.2 GRPO</h3>
+    <p><a href="https://arxiv.org/pdf/2402.03300">GRPO Paper</a></p>
+
+    <p>Simplified loss function compared to PPO</p>
+    <div class="center">
+        <img src="grpo.png" alt="PPO vs GRPO" width="600">
+    </div>
+
+    <p><strong>PPO (simplified for gradient analysis)</strong></p>
+    <div class="math">
+        \[\mathcal{J}_{PPO}(\theta) = \mathbb{E}_{q \sim P_{sft}(Q),\, o \sim \pi_{\theta_{\text{old}}}(O \mid q)} \left[ \frac{1}{|o|} \sum_{t=1}^{|o|} \frac{\pi_{\theta}(o_t \mid q, o_{<t})}{\pi_{\theta_{\text{old}}}(o_t \mid q, o_{<t})} A_t \right]\]
+        \[\nabla_{\theta} \mathcal{J}_{PPO}(\theta) = \mathbb{E}_{q \sim P_{sft}(Q),\, o \sim \pi_{\theta_{\text{old}}}(O \mid q)} \left[ \frac{1}{|o|} \sum_{t=1}^{|o|} A_t \nabla_{\theta} \log \pi_{\theta}(o_t \mid q, o_{<t}) \right]\]
+    </div>
+
+    <p><strong>DPO</strong></p>
+    <div class="math">
+        \[\mathcal{J}_{DPO}(\theta) 
+        = \mathbb{E}_{[q \sim P_{sft}(Q), o^{+}, o^{-} \sim \pi_{sft}(O|q)]} 
+        \log \sigma \left(
+            \beta \frac{1}{|o^{+}|}\sum_{t=1}^{|o^{+}|} \log \frac{\pi_{\theta}(o^{+}_{t}|q,o^{+}_{<t})}{\pi_{\text{ref}}(o^{+}_{t}|q,o^{+}_{<t})}
+            - \beta \frac{1}{|o^{-}|}\sum_{t=1}^{|o^{-}|} \log \frac{\pi_{\theta}(o^{-}_{t}|q,o^{-}_{<t})}{\pi_{\text{ref}}(o^{-}_{t}|q,o^{-}_{<t})}
+        \right)\]
+
+        \[\nabla_{\theta}\mathcal{J}_{DPO}(\theta) 
+        = \mathbb{E}_{[q \sim P_{sft}(Q), o^{+}, o^{-} \sim \pi_{sft}(O|q)]}
+        \left(
+            \frac{1}{|o^{+}|}\sum_{t=1}^{|o^{+}|}GC_{DPO}(q,o,t)\nabla_{\theta}\log\pi_{\theta}(o^{+}_{t}|q,o^{+}_{<t}) \\
+            -\frac{1}{|o^{-}|}\sum_{t=1}^{|o^{-}|}GC_{DPO}(q,o,t)\nabla_{\theta}\log\pi_{\theta}(o^{-}_{t}|q,o^{-}_{<t})
+        \right)\]
+        \[GC_{DPO}(q,o,t) 
+        = \sigma\left(
+            \beta \log \frac{\pi_{\theta}(o^{-}_{t}|q,o^{-}_{<t})}{\pi_{\text{ref}}(o^{-}_{t}|q,o^{-}_{<t})}
+            - \beta \log \frac{\pi_{\theta}(o^{+}_{t}|q,o^{+}_{<t})}{\pi_{\text{ref}}(o^{+}_{t}|q,o^{+}_{<t})}
+        \right)\]
+    </div>
+
+    <p><strong>GRPO</strong></p>
+    <div class="math">
+        \[\mathcal{J}_{\text{GRPO}}(\theta) = \]
+        \[\mathbb{E}_{q \sim P_{sft}(Q),\, \{o_i\}_{i=1}^G \sim \pi_{\theta_{\text{old}}}(O \mid q)} \left[ 
+        \frac{1}{G} \sum_{i=1}^G \frac{1}{|o_i|} \sum_{t=1}^{|o_i|} 
+        \left( 
+            \frac{\pi_\theta(o_{i,t} \mid q, o_{i,<t})}{\pi_{\theta_{\text{old}}}(o_{i,t} \mid q, o_{i,<t})} \hat{A}_{i,t}
+            - \beta \left( \frac{\pi_{\text{ref}}(o_{i,t} \mid q, o_{i,<t})}{\pi_\theta(o_{i,t} \mid q, o_{i,<t})} - \log \frac{\pi_{\text{ref}}(o_{i,t} \mid q, o_{i,<t})}{\pi_\theta(o_{i,t} \mid q, o_{i,<t})} - 1 \right)
+        \right)
+        \right]\]
+
+        \[\nabla_{\theta} \mathcal{J}_{\text{GRPO}}(\theta) = \]
+        \[\mathbb{E}_{q \sim P_{sft}(Q),\, \{o_i\}_{i=1}^G \sim \pi_{\theta_{\text{old}}}(O \mid q)} \left[ 
+        \frac{1}{G} \sum_{i=1}^G \frac{1}{|o_i|} \sum_{t=1}^{|o_i|} 
+        \left( 
+            \hat{A}_{i,t} + \beta \left( \frac{\pi_{\text{ref}}(o_{i,t} \mid q, o_{i,<t})}{\pi_{\theta}(o_{i,t} \mid q, o_{i,<t})} - 1 \right)
+        \right) \nabla_{\theta} \log \pi_{\theta}(o_{i,t} \mid q, o_{i,<t}) 
+        \right]\]
+    </div>
+
+    <h3>3.3 RL for reasoning</h3>
+    <p><strong>Performance</strong></p>
+    <div class="center">
+        <img src="r1-zero-performance.png" alt="DeepSeek-R1-Zero Performance" width="600">
+    </div>
+
+    <ul>
+        <li><strong>Aha Moment, and longer thinking process</strong></li>
+        <li><strong>Mixture of different languages</strong> <a href="https://www.anthropic.com/research/tracing-thoughts-language-model">Anthropic's research about the languages in LLM's head</a>.
+            <ul>
+                <li>alignment (to enforce consistent language) results in a slight degradation in the model's performance</li>
+            </ul>
+        </li>
+        <li>Observed reward hacking on neural reward model -- DeepSeek-R1-Zero is trained purely with rule-based reward</li>
+        <li><strong>Failure with MCTS</strong>
+            <ul>
+                <li>Inspired by AlphaGo</li>
+                <li>Echos the question -- what is a unit action in LLM, token? sequence? or block?</li>
+            </ul>
+        </li>
+        <li>Dislike of few-shot prompting</li>
+    </ul>
+
+    <h2 id="4-qa">4. Q&A</h2>
+</body>
+</html> 
