@@ -29,7 +29,7 @@ thumbnail-img: https://img.youtube.com/vi/8YI4-Xe6LVg/default.jpg
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             line-height: 1.6;
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
             color: #333;
@@ -171,7 +171,7 @@ thumbnail-img: https://img.youtube.com/vi/8YI4-Xe6LVg/default.jpg
     <p>The policy gradient theorem gives us the gradient of this objective (<a href="https://lilianweng.github.io/posts/2018-04-08-policy-gradient/">Lilian's blog</a>):</p>
 
     <div class="math">
-        \[\nabla J(\theta) = \mathbb{E}_{\tau \sim p_\theta(\tau)}[\sum_{t=0}^{T} \nabla_\theta \log \pi_\theta(a_t|s_t) \cdot A(s_t, a_t)\]
+        \[\nabla J(\theta) = \mathbb{E}_{\tau \sim p_\theta(\tau)}[\sum_{t=0}^{T} \nabla_\theta \log \pi_\theta(a_t|s_t) \cdot A(s_t, a_t)]\]
     </div>
 
     <p>Where:</p>
@@ -206,7 +206,7 @@ thumbnail-img: https://img.youtube.com/vi/8YI4-Xe6LVg/default.jpg
     </ul>
 
     <div class="math">
-        \[L^{CLIP}(\theta) = \mathbb{E}_t[\min(r_t(\theta) A_t, \text{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon) A_t)\]
+        \[L^{CLIP}(\theta) = \mathbb{E}_t[\min(r_t(\theta) A_t, \text{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon) A_t)]\]
     </div>
 
     <p>The full PPO loss function combines three components:</p>
@@ -302,14 +302,14 @@ env.close()</code></pre>
     <p>Autoregressive language models generate text by predicting one token at a time, with each prediction conditioned on all previously generated tokens. This sequential generation process can be formalized as:</p>
 
     <div class="math">
-        \[p(x) = \prod_{t=1}^{T} p(x_t | x_{<t})\]
+        \[p(x) = \prod_{t=1}^{T} p(x_t | x_{&lt;t})\]
     </div>
 
     <p>Where:</p>
     <ul>
         <li>\(p(x)\) is the probability of generating the entire sequence \(x\)</li>
         <li>\(x_t\) is the token at position \(t\)</li>
-        <li>\(x_{<t}\) represents all tokens before position \(t\)</li>
+        <li>\(x_{&lt;t}\) represents all tokens before position \(t\)</li>
         <li>\(T\) is the total sequence length</li>
         <li>Note how this is analogous to policy function in RL: \(\pi(a|s)\)</li>
     </ul>
@@ -326,7 +326,7 @@ env.close()</code></pre>
     <p>The training objective is typically to minimize the negative log-likelihood:</p>
 
     <div class="math">
-        \[\mathcal{L}(\theta) = -\sum_{t=1}^{T} \log p_\theta(x_t | x_{<t})\]
+        \[\mathcal{L}(\theta) = -\sum_{t=1}^{T} \log p_\theta(x_t | x_{&lt;t})\]
     </div>
 
     <p>Where \(\theta\) represents the model parameters.</p>
@@ -415,50 +415,65 @@ env.close()</code></pre>
 
     <p><strong>PPO (simplified for gradient analysis)</strong></p>
     <div class="math">
-        \[\mathcal{J}_{PPO}(\theta) = \mathbb{E}_{q \sim P_{sft}(Q),\, o \sim \pi_{\theta_{\text{old}}}(O \mid q)} \left[ \frac{1}{|o|} \sum_{t=1}^{|o|} \frac{\pi_{\theta}(o_t \mid q, o_{<t})}{\pi_{\theta_{\text{old}}}(o_t \mid q, o_{<t})} A_t \right]\]
-        \[\nabla_{\theta} \mathcal{J}_{PPO}(\theta) = \mathbb{E}_{q \sim P_{sft}(Q),\, o \sim \pi_{\theta_{\text{old}}}(O \mid q)} \left[ \frac{1}{|o|} \sum_{t=1}^{|o|} A_t \nabla_{\theta} \log \pi_{\theta}(o_t \mid q, o_{<t}) \right]\]
+        \[
+            \mathcal{J}_{PPO}(\theta) = 
+            \mathbb{E}_{q \sim P_{sft}(Q), o \sim \pi_{\theta_{\text{old}}}(O \mid q)} \left[ 
+                \frac{1}{|o|} \sum_{t=1}^{|o|} \frac{\pi_{\theta}(o_t \mid q, o_{&lt;t})}{\pi_{\theta_{\text{old}}}(o_t \mid q, o_{&lt;t})} A_t 
+            \right]
+        \]
+    </div>
+    <div class="math">
+        \[\nabla_{\theta} \mathcal{J}_{PPO}(\theta) = \mathbb{E}_{q \sim P_{sft}(Q),\, o \sim \pi_{\theta_{\text{old}}}(O \mid q)} \left[ \frac{1}{|o|} \sum_{t=1}^{|o|} A_t \nabla_{\theta} \log \pi_{\theta}(o_t \mid q, o_{&lt;t}) \right]\]
     </div>
 
     <p><strong>DPO</strong></p>
     <div class="math">
         \[\mathcal{J}_{DPO}(\theta) 
-        = \mathbb{E}_{[q \sim P_{sft}(Q), o^{+}, o^{-} \sim \pi_{sft}(O|q)]} 
+        = \mathbb{E}_{(q, o^{+}, o^{-}) \sim \mathcal{D}} 
         \log \sigma \left(
-            \beta \frac{1}{|o^{+}|}\sum_{t=1}^{|o^{+}|} \log \frac{\pi_{\theta}(o^{+}_{t}|q,o^{+}_{<t})}{\pi_{\text{ref}}(o^{+}_{t}|q,o^{+}_{<t})}
-            - \beta \frac{1}{|o^{-}|}\sum_{t=1}^{|o^{-}|} \log \frac{\pi_{\theta}(o^{-}_{t}|q,o^{-}_{<t})}{\pi_{\text{ref}}(o^{-}_{t}|q,o^{-}_{<t})}
+            \beta \frac{1}{|o^{+}|}\sum_{t=1}^{|o^{+}|} \log \frac{\pi_{\theta}(o^{+}_{t}|q,o^{+}_{&lt;t})}{\pi_{\text{ref}}(o^{+}_{t}|q,o^{+}_{&lt;t})}
+            - \beta \frac{1}{|o^{-}|}\sum_{t=1}^{|o^{-}|} \log \frac{\pi_{\theta}(o^{-}_{t}|q,o^{-}_{&lt;t})}{\pi_{\text{ref}}(o^{-}_{t}|q,o^{-}_{&lt;t})}
         \right)\]
+    </div>
 
-        \[\nabla_{\theta}\mathcal{J}_{DPO}(\theta) 
-        = \mathbb{E}_{[q \sim P_{sft}(Q), o^{+}, o^{-} \sim \pi_{sft}(O|q)]}
-        \left(
-            \frac{1}{|o^{+}|}\sum_{t=1}^{|o^{+}|}GC_{DPO}(q,o,t)\nabla_{\theta}\log\pi_{\theta}(o^{+}_{t}|q,o^{+}_{<t}) \\
-            -\frac{1}{|o^{-}|}\sum_{t=1}^{|o^{-}|}GC_{DPO}(q,o,t)\nabla_{\theta}\log\pi_{\theta}(o^{-}_{t}|q,o^{-}_{<t})
-        \right)\]
-        \[GC_{DPO}(q,o,t) 
-        = \sigma\left(
-            \beta \log \frac{\pi_{\theta}(o^{-}_{t}|q,o^{-}_{<t})}{\pi_{\text{ref}}(o^{-}_{t}|q,o^{-}_{<t})}
-            - \beta \log \frac{\pi_{\theta}(o^{+}_{t}|q,o^{+}_{<t})}{\pi_{\text{ref}}(o^{+}_{t}|q,o^{+}_{<t})}
-        \right)\]
+    <div class="math">
+        \[\begin{align}
+        \nabla_{\theta}\mathcal{J}_{DPO}(\theta) 
+        = \mathbb{E}_{(q, o^{+}, o^{-}) \sim \mathcal{D}}
+        \left[
+            \frac{\beta \cdot \sigma(-\Delta)}{|o^{+}|}\sum_{t=1}^{|o^{+}|}\nabla_{\theta}\log\pi_{\theta}(o^{+}_{t}|q,o^{+}_{&lt;t}) 
+            -\frac{\beta \cdot \sigma(-\Delta)}{|o^{-}|}\sum_{t=1}^{|o^{-}|}\nabla_{\theta}\log\pi_{\theta}(o^{-}_{t}|q,o^{-}_{&lt;t})
+        \right]
+        \end{align}\]
+    </div>
+    <div class="math">
+        \[\Delta = \beta \left( \frac{1}{|o^{+}|}\sum_{t=1}^{|o^{+}|} \log \frac{\pi_{\theta}(o^{+}_{t}|q,o^{+}_{&lt;t})}{\pi_{\text{ref}}(o^{+}_{t}|q,o^{+}_{&lt;t})} - \frac{1}{|o^{-}|}\sum_{t=1}^{|o^{-}|} \log \frac{\pi_{\theta}(o^{-}_{t}|q,o^{-}_{&lt;t})}{\pi_{\text{ref}}(o^{-}_{t}|q,o^{-}_{&lt;t})} \right)\]
     </div>
 
     <p><strong>GRPO</strong></p>
     <div class="math">
-        \[\mathcal{J}_{\text{GRPO}}(\theta) = \]
-        \[\mathbb{E}_{q \sim P_{sft}(Q),\, \{o_i\}_{i=1}^G \sim \pi_{\theta_{\text{old}}}(O \mid q)} \left[ 
+        \[\begin{align}
+        \mathcal{J}_{\text{GRPO}}(\theta) = 
+        \mathbb{E}_{q \sim P_{sft}(Q),\, \{o_i\}_{i=1}^G \sim \pi_{\theta_{\text{old}}}(O \mid q)} \left[ 
         \frac{1}{G} \sum_{i=1}^G \frac{1}{|o_i|} \sum_{t=1}^{|o_i|} 
         \left( 
-            \frac{\pi_\theta(o_{i,t} \mid q, o_{i,<t})}{\pi_{\theta_{\text{old}}}(o_{i,t} \mid q, o_{i,<t})} \hat{A}_{i,t}
-            - \beta \left( \frac{\pi_{\text{ref}}(o_{i,t} \mid q, o_{i,<t})}{\pi_\theta(o_{i,t} \mid q, o_{i,<t})} - \log \frac{\pi_{\text{ref}}(o_{i,t} \mid q, o_{i,<t})}{\pi_\theta(o_{i,t} \mid q, o_{i,<t})} - 1 \right)
+            \frac{\pi_\theta(o_{i,t} \mid q, o_{i,&lt;t})}{\pi_{\theta_{\text{old}}}(o_{i,t} \mid q, o_{i,&lt;t})} \hat{A}_{i,t}
+            - \beta \left( \frac{\pi_{\text{ref}}(o_{i,t} \mid q, o_{i,&lt;t})}{\pi_\theta(o_{i,t} \mid q, o_{i,&lt;t})} - \log \frac{\pi_{\text{ref}}(o_{i,t} \mid q, o_{i,&lt;t})}{\pi_\theta(o_{i,t} \mid q, o_{i,&lt;t})} - 1 \right)
         \right)
-        \right]\]
+        \right]
+        \end{align}\]
+    </div>
 
-        \[\nabla_{\theta} \mathcal{J}_{\text{GRPO}}(\theta) = \]
-        \[\mathbb{E}_{q \sim P_{sft}(Q),\, \{o_i\}_{i=1}^G \sim \pi_{\theta_{\text{old}}}(O \mid q)} \left[ 
+    <div class="math">
+        \[\begin{align}
+        \nabla_{\theta} \mathcal{J}_{\text{GRPO}}(\theta) = 
+        \mathbb{E}_{q \sim P_{sft}(Q),\, \{o_i\}_{i=1}^G \sim \pi_{\theta_{\text{old}}}(O \mid q)} \left[ 
         \frac{1}{G} \sum_{i=1}^G \frac{1}{|o_i|} \sum_{t=1}^{|o_i|} 
         \left( 
-            \hat{A}_{i,t} + \beta \left( \frac{\pi_{\text{ref}}(o_{i,t} \mid q, o_{i,<t})}{\pi_{\theta}(o_{i,t} \mid q, o_{i,<t})} - 1 \right)
-        \right) \nabla_{\theta} \log \pi_{\theta}(o_{i,t} \mid q, o_{i,<t}) 
-        \right]\]
+            \hat{A}_{i,t} + \beta \left( \frac{\pi_{\text{ref}}(o_{i,t} \mid q, o_{i,&lt;t})}{\pi_{\theta}(o_{i,t} \mid q, o_{i,&lt;t})} - 1 \right)
+        \right) \nabla_{\theta} \log \pi_{\theta}(o_{i,t} \mid q, o_{i,&lt;t}) 
+        \right]
+        \end{align}\]
     </div>
 
     <h3>3.3 RL for reasoning</h3>
