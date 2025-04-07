@@ -67,6 +67,19 @@ thumbnail-img: https://img.youtube.com/vi/8YI4-Xe6LVg/default.jpg
         .math {
             overflow-x: auto;
             margin: 10px 0;
+            max-width: none;
+            width: 100%;
+        }
+        /* Allow MathJax elements to extend beyond container width */
+        .MathJax {
+            max-width: none !important;
+            overflow-x: visible !important;
+        }
+        /* Create a container for math that allows overflow */
+        .math-container {
+            width: 100%;
+            overflow-x: auto;
+            margin: 10px 0;
         }
     </style>
 </head>
@@ -170,8 +183,10 @@ thumbnail-img: https://img.youtube.com/vi/8YI4-Xe6LVg/default.jpg
 
     <p>The policy gradient theorem gives us the gradient of this objective (<a href="https://lilianweng.github.io/posts/2018-04-08-policy-gradient/">Lilian's blog</a>):</p>
 
-    <div class="math">
-        \[\nabla J(\theta) = \mathbb{E}_{\tau \sim p_\theta(\tau)}[\sum_{t=0}^{T} \nabla_\theta \log \pi_\theta(a_t|s_t) \cdot A(s_t, a_t)]\]
+    <div class="math-container">
+        <div class="math">
+            \[\nabla J(\theta) = \mathbb{E}_{\tau \sim p_\theta(\tau)}[\sum_{t=0}^{T} \nabla_\theta \log \pi_\theta(a_t|s_t) \cdot A(s_t, a_t)\]
+        </div>
     </div>
 
     <p>Where:</p>
@@ -185,8 +200,10 @@ thumbnail-img: https://img.youtube.com/vi/8YI4-Xe6LVg/default.jpg
 
     <p>Where \(A(s_t, a_t)\) is the advantage function, which measures how much better taking action \(a_t\) in state \(s_t\) is compared to the average action according to the current policy:</p>
 
-    <div class="math">
-        \[A(s_t, a_t) = Q(s_t, a_t) - V(s_t)\]
+    <div class="math-container">
+        <div class="math">
+            \[A(s_t, a_t) = Q(s_t, a_t) - V(s_t)\]
+        </div>
     </div>
 
     <h4>Key algorithms and concepts:</h4>
@@ -205,24 +222,36 @@ thumbnail-img: https://img.youtube.com/vi/8YI4-Xe6LVg/default.jpg
         <li>Uses a clipped surrogate objective with advantage function:</li>
     </ul>
 
-    <div class="math">
-        \[L^{CLIP}(\theta) = \mathbb{E}_t[\min(r_t(\theta) A_t, \text{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon) A_t)]\]
+    <div class="math-container">
+        <div class="math">
+            \[L^{CLIP}(\theta) = \mathbb{E}_t[\min(r_t(\theta) A_t, \text{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon) A_t)]\]
+        </div>
     </div>
 
     <p>The full PPO loss function combines three components:</p>
 
-    <div class="math">
-        \[L^{PPO}(\theta) = L^{CLIP}(\theta) - c_1 L^{VF}(\theta) + c_2 S[\pi_\theta](s)\]
+    <div class="math-container">
+        <div class="math">
+            \[L^{PPO}(\theta) = L^{CLIP}(\theta) - c_1 L^{VF}(\theta) + c_2 S[\pi_\theta](s)\]
+        </div>
     </div>
 
     <p>where:</p>
     <ul>
         <li>\(L^{CLIP}(\theta)\) is the clipped surrogate objective described above</li>
         <li>\(L^{VF}(\theta)\) is the value function loss, typically a squared-error loss:
-            <div class="math">\[L^{VF}(\theta) = (V_\theta(s_t) - V_t^{target})^2\]</div>
+            <div class="math-container">
+                <div class="math">
+                    \[L^{VF}(\theta) = (V_\theta(s_t) - V_t^{target})^2\]
+                </div>
+            </div>
         </li>
         <li>\(S[\pi_\theta](s)\) is an entropy bonus to encourage exploration:
-            <div class="math">\[S[\pi_\theta](s) = -\sum_a \pi_\theta(a|s) \log \pi_\theta(a|s)\]</div>
+            <div class="math-container">
+                <div class="math">
+                    \[S[\pi_\theta](s) = -\sum_a \pi_\theta(a|s) \log \pi_\theta(a|s)\]
+                </div>
+            </div>
         </li>
         <li>\(c_1\) and \(c_2\) are coefficients that balance the importance of each term</li>
     </ul>
@@ -301,8 +330,10 @@ env.close()</code></pre>
     <h3>2.1 Autoregressive generative model</h3>
     <p>Autoregressive language models generate text by predicting one token at a time, with each prediction conditioned on all previously generated tokens. This sequential generation process can be formalized as:</p>
 
-    <div class="math">
-        \[p(x) = \prod_{t=1}^{T} p(x_t | x_{&lt;t})\]
+    <div class="math-container">
+        <div class="math">
+            \[p(x) = \prod_{t=1}^{T} p(x_t | x_{&lt;t})\]
+        </div>
     </div>
 
     <p>Where:</p>
@@ -325,8 +356,10 @@ env.close()</code></pre>
 
     <p>The training objective is typically to minimize the negative log-likelihood:</p>
 
-    <div class="math">
-        \[\mathcal{L}(\theta) = -\sum_{t=1}^{T} \log p_\theta(x_t | x_{&lt;t})\]
+    <div class="math-container">
+        <div class="math">
+            \[\mathcal{L}(\theta) = -\sum_{t=1}^{T} \log p_\theta(x_t | x_{&lt;t})\]
+        </div>
     </div>
 
     <p>Where \(\theta\) represents the model parameters.</p>
@@ -367,15 +400,17 @@ env.close()</code></pre>
         <li>Leverages offline generated samples and human labels.</li>
     </ul>
 
-    <div class="math">
-        \[\mathcal{L}_{\text{DPO}}(\pi_{\theta}; \pi_{\text{ref}}) 
-        = -\mathbb{E}_{(x,y_w,y_l) \sim \mathcal{D}} 
-        \left[ 
-            \log \sigma\left(
-                \beta \log \frac{\pi_{\theta}(y_w \mid x)}{\pi_{\text{ref}}(y_w \mid x)} 
-                - \beta \log \frac{\pi_{\theta}(y_l \mid x)}{\pi_{\text{ref}}(y_l \mid x)}
-            \right)
-        \right]\]
+    <div class="math-container">
+        <div class="math">
+            \[\mathcal{L}_{\text{DPO}}(\pi_{\theta}; \pi_{\text{ref}}) 
+            = -\mathbb{E}_{(x,y_w,y_l) \sim \mathcal{D}} 
+            \left[ 
+                \log \sigma\left(
+                    \beta \log \frac{\pi_{\theta}(y_w \mid x)}{\pi_{\text{ref}}(y_w \mid x)} 
+                    - \beta \log \frac{\pi_{\theta}(y_l \mid x)}{\pi_{\text{ref}}(y_l \mid x)}
+                \right)
+            \right]\]
+        </div>
     </div>
 
     <h2 id="3-deepseek-training-paradigm">3. DeepSeek Training Paradigm</h2>
@@ -414,66 +449,80 @@ env.close()</code></pre>
     </div>
 
     <p><strong>PPO (simplified for gradient analysis)</strong></p>
-    <div class="math">
-        \[
-            \mathcal{J}_{PPO}(\theta) = 
-            \mathbb{E}_{q \sim P_{sft}(Q), o \sim \pi_{\theta_{\text{old}}}(O \mid q)} \left[ 
-                \frac{1}{|o|} \sum_{t=1}^{|o|} \frac{\pi_{\theta}(o_t \mid q, o_{&lt;t})}{\pi_{\theta_{\text{old}}}(o_t \mid q, o_{&lt;t})} A_t 
-            \right]
-        \]
+    <div class="math-container">
+        <div class="math">
+            \[
+                \mathcal{J}_{PPO}(\theta) = 
+                \mathbb{E}_{q \sim P_{sft}(Q), o \sim \pi_{\theta_{\text{old}}}(O \mid q)} \left[ 
+                    \frac{1}{|o|} \sum_{t=1}^{|o|} \frac{\pi_{\theta}(o_t \mid q, o_{&lt;t})}{\pi_{\theta_{\text{old}}}(o_t \mid q, o_{&lt;t})} A_t 
+                \right]
+            \]
+        </div>
     </div>
-    <div class="math">
-        \[\nabla_{\theta} \mathcal{J}_{PPO}(\theta) = \mathbb{E}_{q \sim P_{sft}(Q),\, o \sim \pi_{\theta_{\text{old}}}(O \mid q)} \left[ \frac{1}{|o|} \sum_{t=1}^{|o|} A_t \nabla_{\theta} \log \pi_{\theta}(o_t \mid q, o_{&lt;t}) \right]\]
+    <div class="math-container">
+        <div class="math">
+            \[\nabla_{\theta} \mathcal{J}_{PPO}(\theta) = \mathbb{E}_{q \sim P_{sft}(Q),\, o \sim \pi_{\theta_{\text{old}}}(O \mid q)} \left[ \frac{1}{|o|} \sum_{t=1}^{|o|} A_t \nabla_{\theta} \log \pi_{\theta}(o_t \mid q, o_{&lt;t}) \right]\]
+        </div>
     </div>
 
     <p><strong>DPO</strong></p>
-    <div class="math">
-        \[\mathcal{J}_{DPO}(\theta) 
-        = \mathbb{E}_{(q, o^{+}, o^{-}) \sim \mathcal{D}} 
-        \log \sigma \left(
-            \beta \frac{1}{|o^{+}|}\sum_{t=1}^{|o^{+}|} \log \frac{\pi_{\theta}(o^{+}_{t}|q,o^{+}_{&lt;t})}{\pi_{\text{ref}}(o^{+}_{t}|q,o^{+}_{&lt;t})}
-            - \beta \frac{1}{|o^{-}|}\sum_{t=1}^{|o^{-}|} \log \frac{\pi_{\theta}(o^{-}_{t}|q,o^{-}_{&lt;t})}{\pi_{\text{ref}}(o^{-}_{t}|q,o^{-}_{&lt;t})}
-        \right)\]
+    <div class="math-container">
+        <div class="math">
+            \[\mathcal{J}_{DPO}(\theta) 
+            = \mathbb{E}_{(q, o^{+}, o^{-}) \sim \mathcal{D}} 
+            \log \sigma \left(
+                \beta \frac{1}{|o^{+}|}\sum_{t=1}^{|o^{+}|} \log \frac{\pi_{\theta}(o^{+}_{t}|q,o^{+}_{&lt;t})}{\pi_{\text{ref}}(o^{+}_{t}|q,o^{+}_{&lt;t})}
+                - \beta \frac{1}{|o^{-}|}\sum_{t=1}^{|o^{-}|} \log \frac{\pi_{\theta}(o^{-}_{t}|q,o^{-}_{&lt;t})}{\pi_{\text{ref}}(o^{-}_{t}|q,o^{-}_{&lt;t})}
+            \right)\]
+        </div>
     </div>
 
-    <div class="math">
-        \[\begin{align}
-        \nabla_{\theta}\mathcal{J}_{DPO}(\theta) 
-        = \mathbb{E}_{(q, o^{+}, o^{-}) \sim \mathcal{D}}
-        \left[
-            \frac{\beta \cdot \sigma(-\Delta)}{|o^{+}|}\sum_{t=1}^{|o^{+}|}\nabla_{\theta}\log\pi_{\theta}(o^{+}_{t}|q,o^{+}_{&lt;t}) 
-            -\frac{\beta \cdot \sigma(-\Delta)}{|o^{-}|}\sum_{t=1}^{|o^{-}|}\nabla_{\theta}\log\pi_{\theta}(o^{-}_{t}|q,o^{-}_{&lt;t})
-        \right]
-        \end{align}\]
+    <div class="math-container">
+        <div class="math">
+            \[\begin{align}
+            \nabla_{\theta}\mathcal{J}_{DPO}(\theta) 
+            = \mathbb{E}_{(q, o^{+}, o^{-}) \sim \mathcal{D}}
+            \left[
+                \frac{\beta \cdot \sigma(-\Delta)}{|o^{+}|}\sum_{t=1}^{|o^{+}|}\nabla_{\theta}\log\pi_{\theta}(o^{+}_{t}|q,o^{+}_{&lt;t}) 
+                -\frac{\beta \cdot \sigma(-\Delta)}{|o^{-}|}\sum_{t=1}^{|o^{-}|}\nabla_{\theta}\log\pi_{\theta}(o^{-}_{t}|q,o^{-}_{&lt;t})
+            \right]
+            \end{align}\]
+        </div>
     </div>
-    <div class="math">
-        \[\Delta = \beta \left( \frac{1}{|o^{+}|}\sum_{t=1}^{|o^{+}|} \log \frac{\pi_{\theta}(o^{+}_{t}|q,o^{+}_{&lt;t})}{\pi_{\text{ref}}(o^{+}_{t}|q,o^{+}_{&lt;t})} - \frac{1}{|o^{-}|}\sum_{t=1}^{|o^{-}|} \log \frac{\pi_{\theta}(o^{-}_{t}|q,o^{-}_{&lt;t})}{\pi_{\text{ref}}(o^{-}_{t}|q,o^{-}_{&lt;t})} \right)\]
+    <div class="math-container">
+        <div class="math">
+            \[\Delta = \beta \left( \frac{1}{|o^{+}|}\sum_{t=1}^{|o^{+}|} \log \frac{\pi_{\theta}(o^{+}_{t}|q,o^{+}_{&lt;t})}{\pi_{\text{ref}}(o^{+}_{t}|q,o^{+}_{&lt;t})} - \frac{1}{|o^{-}|}\sum_{t=1}^{|o^{-}|} \log \frac{\pi_{\theta}(o^{-}_{t}|q,o^{-}_{&lt;t})}{\pi_{\text{ref}}(o^{-}_{t}|q,o^{-}_{&lt;t})} \right)\]
+        </div>
     </div>
 
     <p><strong>GRPO</strong></p>
-    <div class="math">
-        \[\begin{align}
-        \mathcal{J}_{\text{GRPO}}(\theta) = 
-        \mathbb{E}_{q \sim P_{sft}(Q),\, \{o_i\}_{i=1}^G \sim \pi_{\theta_{\text{old}}}(O \mid q)} \left[ 
-        \frac{1}{G} \sum_{i=1}^G \frac{1}{|o_i|} \sum_{t=1}^{|o_i|} 
-        \left( 
-            \frac{\pi_\theta(o_{i,t} \mid q, o_{i,&lt;t})}{\pi_{\theta_{\text{old}}}(o_{i,t} \mid q, o_{i,&lt;t})} \hat{A}_{i,t}
-            - \beta \left( \frac{\pi_{\text{ref}}(o_{i,t} \mid q, o_{i,&lt;t})}{\pi_\theta(o_{i,t} \mid q, o_{i,&lt;t})} - \log \frac{\pi_{\text{ref}}(o_{i,t} \mid q, o_{i,&lt;t})}{\pi_\theta(o_{i,t} \mid q, o_{i,&lt;t})} - 1 \right)
-        \right)
-        \right]
-        \end{align}\]
+    <div class="math-container">
+        <div class="math">
+            \[\begin{align}
+            \mathcal{J}_{\text{GRPO}}(\theta) = 
+            \mathbb{E}_{q \sim P_{sft}(Q),\, \{o_i\}_{i=1}^G \sim \pi_{\theta_{\text{old}}}(O \mid q)} \left[ 
+            \frac{1}{G} \sum_{i=1}^G \frac{1}{|o_i|} \sum_{t=1}^{|o_i|} 
+            \left( 
+                \frac{\pi_\theta(o_{i,t} \mid q, o_{i,&lt;t})}{\pi_{\theta_{\text{old}}}(o_{i,t} \mid q, o_{i,&lt;t})} \hat{A}_{i,t}
+                - \beta \left( \frac{\pi_{\text{ref}}(o_{i,t} \mid q, o_{i,&lt;t})}{\pi_\theta(o_{i,t} \mid q, o_{i,&lt;t})} - \log \frac{\pi_{\text{ref}}(o_{i,t} \mid q, o_{i,&lt;t})}{\pi_\theta(o_{i,t} \mid q, o_{i,&lt;t})} - 1 \right)
+            \right)
+            \right]
+            \end{align}\]
+        </div>
     </div>
 
-    <div class="math">
-        \[\begin{align}
-        \nabla_{\theta} \mathcal{J}_{\text{GRPO}}(\theta) = 
-        \mathbb{E}_{q \sim P_{sft}(Q),\, \{o_i\}_{i=1}^G \sim \pi_{\theta_{\text{old}}}(O \mid q)} \left[ 
-        \frac{1}{G} \sum_{i=1}^G \frac{1}{|o_i|} \sum_{t=1}^{|o_i|} 
-        \left( 
-            \hat{A}_{i,t} + \beta \left( \frac{\pi_{\text{ref}}(o_{i,t} \mid q, o_{i,&lt;t})}{\pi_{\theta}(o_{i,t} \mid q, o_{i,&lt;t})} - 1 \right)
-        \right) \nabla_{\theta} \log \pi_{\theta}(o_{i,t} \mid q, o_{i,&lt;t}) 
-        \right]
-        \end{align}\]
+    <div class="math-container">
+        <div class="math">
+            \[\begin{align}
+            \nabla_{\theta} \mathcal{J}_{\text{GRPO}}(\theta) = 
+            \mathbb{E}_{q \sim P_{sft}(Q),\, \{o_i\}_{i=1}^G \sim \pi_{\theta_{\text{old}}}(O \mid q)} \left[ 
+            \frac{1}{G} \sum_{i=1}^G \frac{1}{|o_i|} \sum_{t=1}^{|o_i|} 
+            \left( 
+                \hat{A}_{i,t} + \beta \left( \frac{\pi_{\text{ref}}(o_{i,t} \mid q, o_{i,&lt;t})}{\pi_{\theta}(o_{i,t} \mid q, o_{i,&lt;t})} - 1 \right)
+            \right) \nabla_{\theta} \log \pi_{\theta}(o_{i,t} \mid q, o_{i,&lt;t}) 
+            \right]
+            \end{align}\]
+        </div>
     </div>
 
     <h3>3.3 RL for reasoning</h3>
