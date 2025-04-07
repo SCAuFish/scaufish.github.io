@@ -95,7 +95,7 @@ thumbnail-img: https://img.youtube.com/vi/8YI4-Xe6LVg/default.jpg
 
     <p><a href="https://x.com/karpathy/status/1821277264996352246">and there've been interesting discussions</a></p>
     <div class="center">
-        <img src="./a_karpathy_note.png" alt="A note from Andrej Karpathy on Reinforcement Learning" width="600">
+        <img src="{{ site.baseurl }}/assets/images/techblogs/2025-04-04/a_karpathy_note.png" alt="A note from Andrej Karpathy on Reinforcement Learning" width="600">
     </div>
 
     <h2>Agenda</h2>
@@ -108,7 +108,7 @@ thumbnail-img: https://img.youtube.com/vi/8YI4-Xe6LVg/default.jpg
 
     <h2 id="1-introduction-to-rl">1. Introduction to RL</h2>
     <div class="center">
-        <img src="./rl_visualization.png" alt="Reinforcement Learning Visualization" width="600">
+        <img src="{{ site.baseurl }}/assets/images/techblogs/2025-04-04/rl_visualization.png" alt="Reinforcement Learning Visualization" width="600">
     </div>
 
     <p>Take the classic, yet still impressive AlphaGo as an example <a href="https://deepmind.google/research/breakthroughs/alphago/">DeepMind: AlphaGo</a></p>
@@ -171,7 +171,7 @@ thumbnail-img: https://img.youtube.com/vi/8YI4-Xe6LVg/default.jpg
     <p>The policy gradient theorem gives us the gradient of this objective (<a href="https://lilianweng.github.io/posts/2018-04-08-policy-gradient/">Lilian's blog</a>):</p>
 
     <div class="math">
-        \[\nabla J(\theta) = \mathbb{E}_{\tau \sim p_\theta(\tau)}[\sum_{t=0}^{T} \nabla_\theta \log \pi_\theta(a_t|s_t) \cdot A(s_t, a_t)]\]
+        \[\nabla J(\theta) = \mathbb{E}_{\tau \sim p_\theta(\tau)}[\sum_{t=0}^{T} \nabla_\theta \log \pi_\theta(a_t|s_t) \cdot A(s_t, a_t)\]
     </div>
 
     <p>Where:</p>
@@ -206,7 +206,7 @@ thumbnail-img: https://img.youtube.com/vi/8YI4-Xe6LVg/default.jpg
     </ul>
 
     <div class="math">
-        \[L^{CLIP}(\theta) = \mathbb{E}_t[\min(r_t(\theta) A_t, \text{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon) A_t)]\]
+        \[L^{CLIP}(\theta) = \mathbb{E}_t[\min(r_t(\theta) A_t, \text{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon) A_t)\]
     </div>
 
     <p>The full PPO loss function combines three components:</p>
@@ -333,12 +333,12 @@ env.close()</code></pre>
 
     <h3>2.2 Transformer and Decoder-only model</h3>
     <div class="center">
-        <img src="./transformer.png" alt="Transformer Architecture" width="600">
+        <img src="{{ site.baseurl }}/assets/images/techblogs/2025-04-04/transformer.png" alt="Transformer Architecture" width="600">
     </div>
 
     <h4>Generative Pretrained Transformer <a href="https://jalammar.github.io/images/xlnet/gpt-2-autoregression-2.gif">visualization by Jay Alammar</a></h4>
     <div class="center">
-        <img src="./gpt-2-autoregression-2.gif" alt="Auregressive model (GPT-2)" width="600">
+        <img src="{{ site.baseurl }}/assets/images/techblogs/2025-04-04/gpt-2-autoregression-2.gif" alt="Auregressive model (GPT-2)" width="600">
     </div>
 
     <h3>2.3 RLHF in LLM</h3>
@@ -349,7 +349,7 @@ env.close()</code></pre>
     </ul>
 
     <div class="center">
-        <img src="./dpo_graph.png" alt="DPO v.s. PPO RLHF" width="600">
+        <img src="{{ site.baseurl }}/assets/images/techblogs/2025-04-04/dpo_graph.png" alt="DPO v.s. PPO RLHF" width="600">
     </div>
 
     <p><strong>with PPO (Proximal Policy Optimization)</strong></p>
@@ -381,7 +381,7 @@ env.close()</code></pre>
     <h2 id="3-deepseek-training-paradigm">3. DeepSeek Training Paradigm</h2>
     <h3>3.1 DeepSeek-R1 and DeepSeek-R1-Zero <a href="https://x.com/SirrahChan/status/1881488738473357753">visualization by Harry Chan</a></h3>
     <div class="center">
-        <img src="./deepseek-r1-vis.jpeg" alt="How DeepSeek-R1 is trained" width="800">
+        <img src="{{ site.baseurl }}/assets/images/techblogs/2025-04-04/deepseek-r1-vis.jpeg" alt="How DeepSeek-R1 is trained" width="800">
     </div>
 
     <ul>
@@ -410,7 +410,7 @@ env.close()</code></pre>
 
     <p>Simplified loss function compared to PPO</p>
     <div class="center">
-        <img src="./grpo.png" alt="PPO vs GRPO" width="600">
+        <img src="{{ site.baseurl }}/assets/images/techblogs/2025-04-04/grpo.png" alt="PPO vs GRPO" width="600">
     </div>
 
     <p><strong>PPO (simplified for gradient analysis)</strong></p>
@@ -464,7 +464,7 @@ env.close()</code></pre>
     <h3>3.3 RL for reasoning</h3>
     <p><strong>Performance</strong></p>
     <div class="center">
-        <img src="./r1-zero-performance.png" alt="DeepSeek-R1-Zero Performance" width="600">
+        <img src="{{ site.baseurl }}/assets/images/techblogs/2025-04-04/r1-zero-performance.png" alt="DeepSeek-R1-Zero Performance" width="600">
     </div>
 
     <ul>
