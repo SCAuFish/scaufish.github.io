@@ -10,3 +10,6 @@ My name is Cheng Shen (沈成). Rest of myself is still under construction :P
 ### My story
 
 Yeah, this part is still under construction too.
+
+
+[Private travel itinerary](/private-trip/) · PIN required
