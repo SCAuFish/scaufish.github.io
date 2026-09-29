@@ -12,4 +12,4 @@ My name is Cheng Shen (沈成). Rest of myself is still under construction :P
 Yeah, this part is still under construction too.
 
 
-[Private travel itinerary](/private-trip/) · PIN required
+[Odyssey 2026](/odyssey-2026/) · PIN required
