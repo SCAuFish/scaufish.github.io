@@ -12,4 +12,4 @@ My name is Cheng Shen (沈成). Rest of myself is still under construction :P
 Yeah, this part is still under construction too.
 
 
-[Odyssey 2026](/odyssey-2026/) · PIN required &nbsp; | &nbsp; [Road Trip 2026](/roadtrip-2026/) · PIN required
+[Odyssey 2026](/odyssey-2026/) · PIN required &nbsp; &#124; &nbsp; [Road Trip 2026](/roadtrip-2026/) · PIN required
